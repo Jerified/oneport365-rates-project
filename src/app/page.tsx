@@ -1,30 +1,36 @@
-import  RateCard  from "@/components/RateCard";
+'use client'
+
+import Rate from "@/components/Rate";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import Image from "next/image";
 
-export type OptionType = {
-    value: string;
-    label: string;
-  };
-  
-  const option1: OptionType[] = [
-    { value: "20ft", label: "Option1"  },
-    { value: "40ft", label: "Option1" },
-    { value: "40ft hc", label: "Option1" },
-  ];
-
-  const option2: OptionType[] = [
-    { value: "dry", label: "Option2"  },
-    { value: "reefer", label: "Option2" },
-  ];
 
 export default function Home() {
-    // https://oneport365.free.beeceptor.com/live_rates?c  ontainer_size=20FT&container_type=dry
+
+    const fetchRates = async () => {
+        try{
+            const res = await axios.get("/api/Rates")
+            return res.data;
+        } catch(error) {
+            console.log(error)
+        }
+  }
+
+    const { data, isLoading } = useQuery({
+        queryKey: ["rates"], 
+        queryFn: fetchRates
+    })
+    
+  console.log(data)
+  if (isLoading) return <div>Loading...</div>
+        
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen flex-col items-center justify-between p-24 text-black">
         <div className="flex gap-4">
-            <RateCard options={option1} />
-            <RateCard options={option2} />
+            <Rate />
         </div>
+        {JSON.stringify(data)}
     </main>
   );
 }
