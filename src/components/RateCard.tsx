@@ -1,123 +1,85 @@
 "use client"
 
-import {
-    FiEdit,
-    FiChevronDown,
-    FiTrash,
-    FiShare,
-    FiPlusSquare,
-} from "react-icons/fi";
-import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { OptionType } from "@/app/page";
+import axios from 'axios'
+import { Button } from '@/components/ui/button'
 
+type Data = {
+    freightify_request_id: string;
+    freightify_offer_id: string;
+    carrier_name: string;
+    carrier_image: string;
+    carrier_scac: string;
+    offer_type: string;
+    route_schedule: any[];
+    transit_time: string;
+    service_type: string;
+    sailing_date: null | string;
+    demurrage_days: number;
+    detention_days: number;
+    valid_to: string;
+    valid_from: string;
+    commodity: string;
+    total_amount_usd: null | number;
+    total_amount_ngn: null | number;
+    charge_breakdown: {
+        ocean_charges: [
+            {
+                amount: null | number;
+                amountUsd: null | number;
+                description: string;
+                qty: number;
+                rateCurrency: string;
+                rateBasis: string;
+                rateTypeCode: string;
+                paymentMethod: string;
+                containerType: string;
+                amountNgn: null | number;
+                rateNgn: null | number;
+            }
+        ];
+    };
+    origin_port_code: string;
+    destination_port_code: string;
+}[]
 
-
-const wrapperVariants = {
-    open: {
-        scaleY: 1,
-        transition: {
-            when: "beforeChildren",
-            staggerChildren: 0.1,
-        },
-    },
-    closed: {
-        scaleY: 0,
-        transition: {
-            when: "afterChildren",
-            staggerChildren: 0.1,
-        },
-    },
-};
-
-const RateCard = ({ options }: { options: OptionType[] }) => {
-    const [open, setOpen] = useState(false);
-    const [selectedOption, setSelectedOption] = useState<OptionType>(options[0]);
-
-
-
+const RateCard = ({ selected }: { selected: Data }) => {
 
     return (
-        <div className="p-8 pb-56 flex items-center justify-center bg-white ">
-            <motion.div animate={open ? "open" : "closed"} className="relative">
-                <button
-                    onClick={() => setOpen((pv) => !pv)}
-                    className="flex items-center justify-center gap-2 px-3 py-2 rounded-md text-indigo-50 text-lg uppercase bg-indigo-500 w-[8rem] hover:bg-indigo-500 transition-colors"
-                >
-                    <span className="font-medium text-sm">{selectedOption.value}</span>
-                    <span>
-                        <FiChevronDown />
-                    </span>
-                </button>
-
-                <motion.ul
-                    initial={wrapperVariants.closed}
-                    variants={wrapperVariants}
-                    style={{ originY: "top", translateX: "-50%" }}
-                    className="flex flex-col gap-2 p-2 rounded-lg bg-white shadow-xl absolute top-[120%] left-[50%] w-48 overflow-hidden"
-                >
-                    {options.map((option, index) => (
-                        <Option
-                            key={index}
-                            option={option}
-                            setOpen={setOpen}
-                            setSelectedOption={setSelectedOption}
-                            selectedOption={selectedOption}
-                        />
-                    ))}
-                </motion.ul>
-            </motion.div>
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 pt-8">
+            {selected.map((d, index) => {
+                let formatter = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 0
+                })
+                const formatterAmount = formatter.format(Number(d.total_amount_usd))
+                return (
+                    <div key={index} className="bg-white flex flex-col text-black  border-2 cursor-pointer hover:border-green-600 hover:transition-all hover:duration-150  border-gray-200 rounded-lg p-6">
+                        <div className="flex justify-between gap-4">
+                            <p>{d.carrier_name}</p>
+                            <p>{d.origin_port_code}-{d.destination_port_code}</p>
+                        </div>
+                        <p className='pt-3 text-[#073418] font-medium text-xl pb-6'>{formatterAmount}</p>
+                        <div className='border-b border-gray-200  h-1 w-full'></div>
+                        <div className='pt-4 flex justify-between'>
+                            <div className='flex flex-col gap-2'>
+                                <p className='text-sm text-gray-500'>Sailing Date</p>
+                                <p className='text-sm'>{d.sailing_date === null ? 'N/A' : 'date'}</p>
+                            </div>
+                            <div className='flex flex-col gap-2'>
+                                <p className='text-sm text-gray-500'>Transit Time</p>
+                                <p className='text-sm'>{d.sailing_date === null ? 'N/A' : 'date'}</p>
+                            </div>
+                            <div className='flex flex-col gap-2'>
+                                <p className='text-sm text-gray-500'>Free Days</p>
+                                <p className='text-sm'>{d.detention_days + d.demurrage_days} days</p>
+                            </div>
+                        </div>
+                    </div>
+                )
+            })}
         </div>
-    );
-};
-
-const Option = ({
-    option,
-    setOpen,
-    selectedOption,
-    setSelectedOption,
-}: {
-    option: OptionType;
-    setOpen: (open: boolean) => void;
-    setSelectedOption: (option: OptionType) => void;
-    selectedOption: OptionType;
-}) => {
-
-    const [selectedOption1, setSelectedOption1] = useState<OptionType | null>(null);
-
-    const handleChange = (e: React.MouseEvent<HTMLElement>) => {
-        setOpen(false);
-        setSelectedOption(option);
-        console.log(selectedOption)
-
-        callAPI(option)
-    }
-
-    const callAPI = async (option: OptionType) => {
-        const response = await fetch('api/Rates', {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({option})
-        })
-        console.log(option)
-    }
-
-    // useEffect(() => {
-    //     // https://oneport365.free.beeceptor.com/live_rates?c  ontainer_size=20FT&container_type=dry
-
-    // },[])
-
-return (
-    <li
-        // onChange={handleChange}
-        onClick={handleChange}
-        className="flex items-center gap-2 w-full p-2 text-xs font-medium whitespace-nowrap rounded-md hover:bg-indigo-100 text-slate-700 hover:text-indigo-500 transition-colors cursor-pointer"
-    >
-        <span>{option.value}</span>
-    </li>
-);
-  };
-
+    )
+}
 export default RateCard;

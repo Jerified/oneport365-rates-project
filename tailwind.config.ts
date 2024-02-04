@@ -74,7 +74,7 @@ const config = {
       },
     },
   },
-  plugins: [require("daisyui")],
+  plugins: [require("daisyui"),require("tailwind-scrollbar")],
 } satisfies Config
 
 export default config
