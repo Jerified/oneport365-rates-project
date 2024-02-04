@@ -51,10 +51,17 @@ type carrierNameProps = {
 const ITEMS_PER_PAGE = 9
 
 const CarrierName = ({ results }: carrierNameProps) => {
-    const [selected, setSelected] = useState<Data[]>(results.slice(0, ITEMS_PER_PAGE))
+    const [selected, setSelected] = useState(() => {
+        const firstCarrier = results[0].carrier_name
+        const firstRate = results.filter(d => d.carrier_name === firstCarrier)
+        return firstRate.slice(0, ITEMS_PER_PAGE)
+    })
     const [selectedCarrier, setSelectedCarrier] = useState<string>("")
-    const [carrierLength, setCarrierLength] = useState<number>(0)
+    const [carrierLength, setCarrierLength] = useState(() => {
+        return selected.length
+    })
     const [showAll, setShowAll] = useState(false)
+    console.log(selected)
     const uniqueCarrierNames = new Set(results.map(d => d.carrier_name))
     const filterRate = (name: string) => {
         const rate = results.filter(d => d.carrier_name === name)
@@ -63,29 +70,32 @@ const CarrierName = ({ results }: carrierNameProps) => {
         setSelectedCarrier(name)
         setShowAll(false)
     }
-    
+
     
     const handleToggle = () => {
         setShowAll(!showAll)
         if (showAll) {
             setSelected(results.slice(0, ITEMS_PER_PAGE));
-          } else {
+        } else {
             setSelected(results.filter(d => d.carrier_name === selectedCarrier));
-          }
+        }
     }
-
+    
     return (
         <div className=" flex flex-col gap-4 w-full">
             <div className="flex gap-4 overflow-x-scroll scrollbar w-full">
-            {Array.from(uniqueCarrierNames).map((name, index) => (
-                <Button key={index} onClick={() => filterRate(name)}  className="text-lg px-4 py-6 font-normal border border-zinc-600 text-black bg-white hover:text-white">{name}</Button>
+                {Array.from(uniqueCarrierNames).map((name, index) => (
+                    <Button key={index} onClick={() => filterRate(name)} className="text-lg px-4 py-6 font-normal border border-zinc-600 text-black bg-white hover:text-white">{name}</Button>
                 ))}
             </div>
             <RateCard selected={selected} />
-            <p className='text-center pt-5 text-[0.9rem]'>Viewing {selected.length} of {carrierLength} special rates</p>
-            <button onClick={handleToggle} className='w-fit mx-auto border-zinc-600 border bg-white text-black px-12 py-3 text-md rounded-md'>
-                {showAll ? "Show Less" : "Show All"}
-            </button>
+            {carrierLength > ITEMS_PER_PAGE && <div className='mx-auto flex flex-col gap-4 pt-5 '>
+                <p className='text-center text-[0.9rem]'>Viewing {selected.length} of {carrierLength} special rates</p>
+                <button onClick={handleToggle} className='w-fit mx-auto border-zinc-600 border bg-white text-black px-12 py-3 text-md rounded-md'>
+                    {showAll ? "Show Less" : "Show All"}
+                </button>
+            </div>
+            }
         </div>
     )
 }
