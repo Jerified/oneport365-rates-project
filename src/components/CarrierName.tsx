@@ -51,29 +51,33 @@ type carrierNameProps = {
 const ITEMS_PER_PAGE = 9
 
 const CarrierName = ({ results }: carrierNameProps) => {
-    const [selected, setSelected] = useState(() => {
+    const [selected, setSelected] = useState(
+        () => {
         const firstCarrier = results[0].carrier_name
         const firstRate = results.filter(d => d.carrier_name === firstCarrier)
-        return firstRate.slice(0, ITEMS_PER_PAGE)
-    })
-    const [selectedCarrier, setSelectedCarrier] = useState<string>("")
+        return firstRate.slice(0, ITEMS_PER_PAGE) }
+        )
+    const [selectedCarrier, setSelectedCarrier] = useState(
+        () => {
+            return results[0].carrier_name
+        }
+    )
     const [carrierLength, setCarrierLength] = useState(() => {
-        return selected.length
+        const firstCarrier = results[0].carrier_name
+        return results.filter(d => d.carrier_name === firstCarrier).length
     })
     const [showAll, setShowAll] = useState(false)
-    console.log(selected)
     const uniqueCarrierNames = new Set(results.map(d => d.carrier_name))
     const filterRate = (name: string) => {
         const rate = results.filter(d => d.carrier_name === name)
+        setSelectedCarrier(name)
         setCarrierLength(rate.length)
         setSelected(rate.slice(0, ITEMS_PER_PAGE))
-        setSelectedCarrier(name)
         setShowAll(false)
     }
-
     
     const handleToggle = () => {
-        setShowAll(!showAll)
+        setShowAll(prev => !prev)
         if (showAll) {
             setSelected(results.slice(0, ITEMS_PER_PAGE));
         } else {
