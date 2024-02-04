@@ -11,7 +11,6 @@ import { FreightData } from "@/lib/types";
 import { Button } from '@/components/ui/button'
 import { useState } from "react";
 
-
 export default async function Home() {
     const jsonPath = path.join(process.cwd(), 'content.json');
     const jsonData = await fs.readFile(jsonPath, 'utf8');
@@ -34,7 +33,7 @@ export default async function Home() {
     // })
 
     return (
-        <main className="p-8 max-w-8xl mx-auto ">
+        <main className="py-8 px-5 max-w-8xl mx-auto bg-white min-h-screen ">
             <h1 className='font-medium text-4xl pb-8'>Special Rates</h1>
             <div className="flex gap-4">
                 <Rate />

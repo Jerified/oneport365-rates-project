@@ -42,24 +42,50 @@ type Data = {
     };
     origin_port_code: string;
     destination_port_code: string;
-}[]
+}
 
-const CarrierName = ({ results }: { results: Data}) => {
-    const [selected, setSelected] = useState(results)
+type carrierNameProps = {
+    results: Data[]
+}
+
+const ITEMS_PER_PAGE = 9
+
+const CarrierName = ({ results }: carrierNameProps) => {
+    const [selected, setSelected] = useState<Data[]>(results.slice(0, ITEMS_PER_PAGE))
+    const [selectedCarrier, setSelectedCarrier] = useState<string>("")
+    const [carrierLength, setCarrierLength] = useState<number>(0)
+    const [showAll, setShowAll] = useState(false)
     const uniqueCarrierNames = new Set(results.map(d => d.carrier_name))
     const filterRate = (name: string) => {
         const rate = results.filter(d => d.carrier_name === name)
-        setSelected(rate)
+        setCarrierLength(rate.length)
+        setSelected(rate.slice(0, ITEMS_PER_PAGE))
+        setSelectedCarrier(name)
+        setShowAll(false)
+    }
+    
+    
+    const handleToggle = () => {
+        setShowAll(!showAll)
+        if (showAll) {
+            setSelected(results.slice(0, ITEMS_PER_PAGE));
+          } else {
+            setSelected(results.filter(d => d.carrier_name === selectedCarrier));
+          }
     }
 
     return (
-        <div className=" flex flex-col gap-8 w-full">
-            <div className="flex gap-4 overflow-hidden scrollbar w-full">
+        <div className=" flex flex-col gap-4 w-full">
+            <div className="flex gap-4 overflow-x-scroll scrollbar w-full">
             {Array.from(uniqueCarrierNames).map((name, index) => (
-                <Button key={index} onClick={() => filterRate(name)}  className="text-lg px-4 py-5 font-normal border text-black bg-white">{name}</Button>
+                <Button key={index} onClick={() => filterRate(name)}  className="text-lg px-4 py-6 font-normal border border-zinc-600 text-black bg-white hover:text-white">{name}</Button>
                 ))}
             </div>
             <RateCard selected={selected} />
+            <p className='text-center pt-5 text-[0.9rem]'>Viewing {selected.length} of {carrierLength} special rates</p>
+            <button onClick={handleToggle} className='w-fit mx-auto border-zinc-600 border bg-white text-black px-12 py-3 text-md rounded-md'>
+                {showAll ? "Show Less" : "Show All"}
+            </button>
         </div>
     )
 }
