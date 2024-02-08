@@ -40,7 +40,7 @@ const CarrierName = ({ results }: carrierNameProps) => {
     const handleToggle = () => {
         setShowAll(prev => !prev)
         if (showAll) {
-            setSelected(results.slice(0, ITEMS_PER_PAGE));
+            setSelected(results.filter(d => d.carrier_name === selectedCarrier).slice(0, ITEMS_PER_PAGE));
         } else {
             setSelected(results.filter(d => d.carrier_name === selectedCarrier));
         }

@@ -40,8 +40,6 @@ const Rate = () => {
 
     const retrieveRate = async (size: string, type: string) => {
         const res = await axios.get(`https://test-api.oneport365.com/api/live_rates/get_special_rates_no_auth?container_size=${size}&container_type=${type}`)
-        console.log(size)
-        console.log(type)
         return res.data.data.rates
     }
 
@@ -52,7 +50,7 @@ const Rate = () => {
 
     if(isLoading) return <div className='loading loading-spinner text-success flex justify-center items-center mx-auto w-10'></div>
 
-    if(error) return toast.error(error.message)
+    if(error) return <div className="text-white">{toast.error(error.message)}</div>
 
     return (
         <section className='fle flex-col gap-8'>
