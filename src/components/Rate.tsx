@@ -1,8 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import axios from 'axios'
-import RateCard from './RateCard'
+import CarrierName from './CarrierName'
+import { useQuery } from "@tanstack/react-query";
+import toast, { Toaster } from "react-hot-toast";
 
 export type OptionType = {
     value: string;
@@ -19,29 +21,43 @@ const option2: OptionType[] = [
     { value: "reefer" },
 ];
 const Rate = () => {
-    const [size, setsize] = useState('20FT')
-    const [type, setType] = useState('dry')
-    // const [selectedOption, setSelectedOption] = useState<OptionType>(options[0]);
+    const [options, setOptions] = useState({size: option1[0].value, type: option2[0].value})
 
     const handleSelectsize = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setsize(e.target.value)
-        callAPI(size, type)
+        setOptions({...options, size:e.target.value})
+        retrieveRate(e.target.value,options.type) 
     }
 
     const handleSelectType = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setType(e.target.value)
-        callAPI(size, type)
+        setOptions({...options, type:e.target.value})
+        retrieveRate(options.size,e.target.value) 
     }
 
-    const callAPI = async (size: string, type: string) => {
-        const { data } = await axios.post('/api/Rates', { size, type })
-        console.log(data)
+    useEffect(() => {
+        retrieveRate(options.size, options.type)
+      }, [options])
+      
+
+    const retrieveRate = async (size: string, type: string) => {
+        const res = await axios.get(`https://test-api.oneport365.com/api/live_rates/get_special_rates_no_auth?container_size=${size}&container_type=${type}`)
+        console.log(size)
+        console.log(type)
+        return res.data.data.rates
     }
+
+    const { data: results, error, isLoading } = useQuery({
+        queryKey: ["rates"],
+        queryFn: () => retrieveRate(options.size, options.type)
+    })
+
+    if(isLoading) return <div className='loading loading-spinner text-success flex justify-center items-center mx-auto w-10'></div>
+
+    if(error) return toast.error(error.message)
 
     return (
-        <section className='flex flex-col gap-8'>
+        <section className='fle flex-col gap-8'>
             <div className=" flex gap-8">
-                <select onChange={handleSelectsize} className="select select-bordered w-full bg-white outline-none border-non rounded-md">
+                <select onChange={handleSelectsize} className="select select-bordered w-fit bg-white outline-none border-non rounded-md">
                     {option1.map((option, index) => (
                         <option
                             key={index}
@@ -51,7 +67,7 @@ const Rate = () => {
                         </option>
                     ))}
                 </select>
-                <select onChange={handleSelectType} className="select select-bordered w-full bg-white outline-0 border-non rounded-md">
+                <select onChange={handleSelectType} className="select select-bordered w-fit bg-white outline-0 border-non rounded-md uppercase">
                     {option2.map((option, index) => (
                         <option
                             key={index}
@@ -64,8 +80,9 @@ const Rate = () => {
 
 
             </div>
-
-            {/* <RateCard /> */}
+            <div className="pt-4">
+                    <CarrierName results={results}/>
+            </div>
         </section>
     );
 };

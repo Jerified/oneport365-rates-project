@@ -4,31 +4,14 @@ export async function POST(req: Request,res: Response) {
     try {
         const {size, type} = await req.json()
         
-        console.log(size, type)
-        // console.log(type)
-        const response = await fetch(`https://oneport365.free.beeceptor.com/live_rates?container_size=${size}&container_type=${type}`)
+        console.log(size)
+        const response = await fetch(`https://test-api.oneport365.com/api/live_rates/get_special_rates_no_auth?container_size=${size}&container_type=${type}`)
         console.log(response)
-        return NextResponse.json({data: response}, {
+        return Response.json({data: response}, {
             status: 200
         })
     } catch (error) {
-        return NextResponse.json({
-            error: "Internal server error"
-        }, {
-            status: 500
-        })
-
-    }
-}
-
-export async function GET(req: Request,res: Response) {
-    try {
-        const response = await fetch(`/Rates`)
-        console.log(response)
-        return NextResponse.json({data: response}, {
-            status: 200
-        })
-    } catch (error) {
+        console.log(error)
         return NextResponse.json({
             error: "Internal server error"
         }, {
